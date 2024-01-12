@@ -1,4 +1,5 @@
 #cel mai nou/ bun cod: culori sarpe + top score + restart +backround in carouri
+#ce faci rob
 #asa e i am rupt adsafasadsfafw
 # imports of different modules
 import pygame
