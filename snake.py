@@ -1,20 +1,9 @@
-#cel mai nou/ bun cod: culori sarpe + top 3 score
+#cel mai nou/ bun cod: culori sarpe + top score + restart
 # imports of different modules
 import pygame
 import sys
 import random
 import time
-
-'''
-# Here first we will check if the pygame successfully Initialized
-check_errors = pygame.init()
-
-if check_errors[1] > 0:
-    print("(!) had {0} initializing errors, exiting....".format(check_errors[1]))
-    sys.exit(-1)
-else:
-    print("(!) PyGame Initialized Successfully!!!")
-'''
 
 pygame.init()
 # Play Surface
@@ -31,7 +20,7 @@ snake_color = pygame.Color(0, 255, 0) #green-snake
 white = pygame.Color(255, 255, 255) #white-score
 black = pygame.Color(0, 0, 0) #black-screen
 dark_red = pygame.Color(128, 0, 0) #food color
-brown = pygame.Color(165, 42, 42) #brown-food
+#brown = pygame.Color(165, 42, 42) #brown-food
 
 # fps controller
 fpsController = pygame.time.Clock()
@@ -39,12 +28,6 @@ fpsController = pygame.time.Clock()
 # important varibles for the gameover
 snakePos = [100, 50] #initial coordinate of the snake head
 snakeBody = [[100, 50], [90, 50], [80, 50]] #snake snakeBody
-
-    # Set a random start point.
-#startx = random.randint(5, window_width - 6)
-#starty = random.randint(5, window_length - 6)
-#snakePos = [startx, starty]
-#snakeBody =  [[startx, starty], [startx - 1, starty], [startx - 2, starty]]
 
 foodPos = [random.randrange(1, (window_width//10)) * 10, 
            random.randrange(1,(window_length//10)) * 10] #random food positioning
@@ -56,6 +39,19 @@ score = 0
 snake_speed = 10
 initscore = 0
 
+# Variabile pentru buton
+button_rect = pygame.Rect(300, 400, 120, 50)
+button_color = (0, 0, 255)
+button_text = "RESTART"
+button_font = pygame.font.SysFont('monaco', 24)
+button_text_surface = button_font.render(button_text, True, white)
+button_text_rect = button_text_surface.get_rect(center=button_rect.center)
+
+# Funcție pentru desenarea butonului
+def draw_button():
+    pygame.draw.rect(playSurface, button_color, button_rect)
+    playSurface.blit(button_text_surface, button_text_rect)
+
 # Game Over function
 def gameOver():
     myFont = pygame.font.SysFont('monaco', 72) #choose font name and size
@@ -65,13 +61,31 @@ def gameOver():
     playSurface.blit(GOsurf, GOrect) # bind the gameover text to the main surface
     showScore(0)
     pygame.display.flip() # to set the fps
-    time.sleep(2)
-    pygame.quit() # exit game window
-    sys.exit() # exit cmd console
+        
+    #time.sleep(2)
+    #pygame.quit() # exit game window
+    #sys.exit() # exit cmd console
+
+ocean_color=pygame.Color('mediumaquamarine') 
+
+def draw_ocean(): 
+   for row in range(40) :
+       if row %2==0:
+        for col in range(40):
+            ocean_rect=pygame.Rect(col*60,row*60,60,60)
+            pygame.draw.rect(playSurface,ocean_color,ocean_rect)
+       else: 
+            for col in range(40):
+             if col %2 !=0:
+              ocean_rect=pygame.Rect(col*60,row*60,60,60)
+              pygame.draw.rect(playSurface,ocean_color,ocean_rect)
+
+# Funcție pentru afișarea scorului
+game_over_flag = False
 
 def showScore(choice=1):
     sFont = pygame.font.SysFont('monaco', 42) #choose font name and size
-    Ssurf = sFont.render('SCORE : {0}'.format(score), True, white) # this is the surface where game over will display having 3 args : the message, antialiasing,and Color
+    Ssurf = sFont.render('SCORE : {0}'.format(score), True, black) # this is the surface where game over will display having 3 args : the message, antialiasing,and Color
     Srect = Ssurf.get_rect() #to get rect coordinates of the game over text surface
     if choice == 1:
         Srect.midtop = (80, 10)
@@ -81,34 +95,20 @@ def showScore(choice=1):
     playSurface.blit(Ssurf, Srect) # bind the gameover text to the main surface
     pygame.display.flip() # to set the fps
 
-#The "update_score" function appends the new score to the list, sorts it in descending order, keeps only the top 3 scores, and then writes them back to the file.
 def update_score(nscore):
-    scores = get_scores()
-    # Add the new score to the list
-    scores.append(nscore)
-    # Sort the scores in descending order
-    scores.sort(reverse=True)
-    # Keep only the top 3 scores
-    scores = scores[:3]
+    score = max_score()
 
     with open('highest_score.txt', 'w') as f:
-        for score in scores:
-            f.write(str(score) + '\n')
+        if int(score) > nscore:
+            f.write(str(score))
+        else:
+            f.write(str(nscore))
 
-#"get_scores" function reads all scores from the file and returns them as a list
-def get_scores():
+def max_score():
     with open('highest_score.txt', 'r') as f:
         lines = f.readlines()
-        scores = [int(line.strip()) for line in lines]
-    return scores
-
-#The "display_scores" function prints the top 3 highest scores.
-def display_scores():
-    scores = get_scores()
-    print("Top 3 Highest Scores:")
-    for i, score in enumerate(scores[:3], 1):
-        print(f"{i}. {score}")
-
+        score = lines[0].strip()
+    return score
 
 # Main Logic Of The GAME
 while True:
@@ -116,6 +116,7 @@ while True:
         if event.type == pygame.QUIT: # quit event
             pygame.quit()
             sys.exit()
+
         elif event.type == pygame.KEYDOWN: # when keyboard key is pressed
             if event.key == pygame.K_RIGHT or event.key == ord('d'): # Right Move
                 changeTo = 'RIGHT'
@@ -129,14 +130,15 @@ while True:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))  # post function first creates a event and inside it we emit a quit event
 
     # validation of direction
-    if changeTo == 'LEFT' and not direction =='RIGHT':
-        direction = 'LEFT'
-    if changeTo == 'RIGHT' and not direction =='LEFT':
-        direction = 'RIGHT'
-    if changeTo == 'UP' and not direction =='DOWN':
-        direction = 'UP'
-    if changeTo == 'DOWN' and not direction =='UP':
-        direction = 'DOWN'
+    if  game_over_flag==False and not (snakePos[0] > 710 or snakePos[0] < 0) and not (snakePos[1] > 450 or snakePos[1] < 0):            
+        if changeTo == 'LEFT' and not direction =='RIGHT':
+            direction = 'LEFT'
+        if changeTo == 'RIGHT' and not direction =='LEFT':
+            direction = 'RIGHT'
+        if changeTo == 'UP' and not direction =='DOWN':
+            direction = 'UP'
+        if changeTo == 'DOWN' and not direction =='UP':
+            direction = 'DOWN'
 
     # Value change after direction change
     if direction == 'RIGHT':
@@ -158,11 +160,15 @@ while True:
         snake_color = pygame.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
     else:
         snakeBody.pop()
-    # food spawn
+    
+    #Food spawn
     if foodSpawn == False:
         foodPos = [random.randrange(1,72)*10,random.randrange(1,46)*10]
     foodSpawn = True
-    playSurface.fill(black)
+
+    playSurface.fill(('cadetblue2'))
+    draw_ocean()
+
     for pos in snakeBody:
         pygame.draw.rect(playSurface, snake_color, pygame.Rect(pos[0],pos[1],10,10))
     pygame.draw.rect(playSurface,dark_red,pygame.Rect(foodPos[0],foodPos[1],10,10))
@@ -170,21 +176,68 @@ while True:
     # Boundary Condition
     if snakePos[0] > 710 or snakePos[0] < 0:
         update_score(score)
+        draw_button()
         gameOver()
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if button_rect.collidepoint(mouse_x, mouse_y):
+                snakePos = [100, 50]
+                snakeBody = [[100, 50], [90, 50], [80, 50]]
+                foodPos = [random.randrange(1, 72) * 10, random.randrange(1, 46) * 10]
+                foodSpawn = True
+                direction = 'RIGHT'
+                changeTo = direction
+                score = 0
+                snake_speed = 10
+                initscore = 0
+            
+
     if snakePos[1] > 450 or snakePos[1] < 0:
         update_score(score)
+        draw_button()
         gameOver()
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if button_rect.collidepoint(mouse_x, mouse_y):
+                snakePos = [100, 50]
+                snakeBody = [[100, 50], [90, 50], [80, 50]]
+                foodPos = [random.randrange(1, 72) * 10, random.randrange(1, 46) * 10]
+                foodSpawn = True
+                direction = 'RIGHT'
+                changeTo = direction
+                score = 0
+                snake_speed = 10
+                initscore = 0
+            
 
     # Self Body Collision
     for block in snakeBody[1:]:
         if snakePos[0] == block[0] and snakePos[1] == block[1]:
             update_score(score) 
-            gameOver()
+            game_over_flag=True
+            break              
 
-    showScore() # To show the score
+    if game_over_flag:
+        draw_button()
+        gameOver()
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if button_rect.collidepoint(mouse_x, mouse_y) and game_over_flag:
+                snakePos = [100, 50]
+                snakeBody = [[100, 50], [90, 50], [80, 50]]
+                foodPos = [random.randrange(1, 72) * 10, random.randrange(1, 46) * 10]
+                foodSpawn = True
+                direction = 'RIGHT'
+                changeTo = direction
+                score = 0
+                snake_speed = 10
+                initscore = 0
+                game_over_flag = False
+                              
+    showScore()
     # FPS CONTROL
     pygame.display.update()
-    #pygame.display.update()
+
     if score == initscore+3:
         snake_speed+=5
         initscore = score
