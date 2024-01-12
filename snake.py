@@ -4,6 +4,7 @@ import pygame
 import sys
 import random
 import time
+
 pygame.init()
 # Play Surface
 window_width = 720
@@ -36,7 +37,7 @@ direction = 'RIGHT'
 changeTo = direction
 score = 0
 snake_speed = 10
-initscore = 0
+initscore=0
 
 # Variabile pentru buton
 button_rect = pygame.Rect(300, 400, 120, 50)
