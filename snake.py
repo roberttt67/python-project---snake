@@ -4,7 +4,6 @@ import pygame
 import sys
 import random
 import time
-
 pygame.init()
 # Play Surface
 window_width = 720
