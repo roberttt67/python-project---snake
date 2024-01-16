@@ -62,9 +62,6 @@ def gameOver():
     showScore(0)
     pygame.display.flip() # to set the fps
         
-    #time.sleep(2)
-    #pygame.quit() # exit game window
-    #sys.exit() # exit cmd console
 
 ocean_color=pygame.Color('mediumaquamarine') 
 
