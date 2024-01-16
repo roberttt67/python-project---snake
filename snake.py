@@ -29,7 +29,7 @@ fpsController = pygame.time.Clock()
 snakePos = [100, 50] #initial coordinate of the snake head
 snakeBody = [[100, 50], [90, 50], [80, 50]] #snake snakeBody
 
-foodPos = [random.randrange(1, (window_width//10)) * 10, 
+ foodPos = [random.randrange(1, (window_width//10)) * 10, 
            random.randrange(1,(window_length//10)) * 10] #random food positioning
 
 foodSpawn = True
@@ -50,7 +50,7 @@ button_text_rect = button_text_surface.get_rect(center=button_rect.center)
 # Funcție pentru desenarea butonului
 def draw_button():
     pygame.draw.rect(playSurface, button_color, button_rect)
-    playSurface.blit(button_text_surface, button_text_rect)
+    playSurface.blit(button_text_surface, button_text_rect) #aici cu functia blit punem textul in suprafata butonului
 
 # Game Over function
 def gameOver():
